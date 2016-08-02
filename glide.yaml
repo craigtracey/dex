@@ -74,3 +74,4 @@ import:
   version: c87af80f3cc5036b55b83d77171e156791085e2e
 - package: gopkg.in/ldap.v2
   version: e9a325d64989e2844be629682cb085d2c58eef8d
+- package: github.com/go-sql-driver/mysql

@@ -97,7 +97,9 @@ func main() {
 		log.Fatalf(err.Error())
 	}
 	if _, ok := dbc.Dialect.(gorp.PostgresDialect); !ok {
-		log.Fatal("only postgres backend supported for multi server configurations")
+		if _, ok := dbc.Dialect.(gorp.MySQLDialect); !ok {
+			log.Fatal("only postgres or mysql backends supported for multi server configurations")
+		}
 	}
 
 	if *dbMigrate {

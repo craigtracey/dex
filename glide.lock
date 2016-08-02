@@ -1,5 +1,5 @@
-hash: 2e6ef5ae85fe17d9b695b37ba6875b438a617692cc1f6fefc682c4e405a4dcf1
-updated: 2016-06-28T10:36:39.146887182-07:00
+hash: e86e805f98e2f1a294d88e3767a4ad22c40febd244ea2c492c80c071a87e6f43
+updated: 2016-07-28T22:30:32.569206438Z
 imports:
 - name: github.com/andybalholm/cascadia
   version: 6122e68c2642b7b75c538a63b15168c6c80fb757
@@ -21,6 +21,8 @@ imports:
   - timeutil
 - name: github.com/go-gorp/gorp
   version: c44345f52fc81d27c47e6b592dedaf8c28a972eb
+- name: github.com/go-sql-driver/mysql
+  version: 3654d25ec346ee8ce71a68431025458d52a38ac0
 - name: github.com/gorilla/handlers
   version: 60c7bfde3e33c201519a200a4507a158cc03a17b
 - name: github.com/inconshreveable/mousetrap

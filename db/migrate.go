@@ -54,6 +54,8 @@ func migrationSource(dbMap *gorp.DbMap) (src migrate.MigrationSource, dialect st
 	switch dbMap.Dialect.(type) {
 	case gorp.PostgresDialect:
 		return migrations.PostgresMigrations, "postgres", nil
+	case gorp.MySQLDialect:
+		return migrations.MySQLMigrations, "mysql", nil	
 	case gorp.SqliteDialect:
 		src = &migrate.MemoryMigrationSource{
 			Migrations: []*migrate.Migration{

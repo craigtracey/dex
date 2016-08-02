@@ -9,8 +9,11 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 	"text/template"
 )
+
+var dbDialects = [...]string{"Postgres", "MySQL"}
 
 var funcs = template.FuncMap{
 	"quote": strconv.Quote,
@@ -22,8 +25,8 @@ var tmpl = template.Must(template.New("assets.go").Delims("{%", "%}").Funcs(func
 
 import "github.com/rubenv/sql-migrate"
 
-var PostgresMigrations migrate.MigrationSource = &migrate.MemoryMigrationSource{
-	Migrations: []*migrate.Migration{{% range $i, $m := . %}
+var {% .DatabaseDialect %}Migrations migrate.MigrationSource = &migrate.MemoryMigrationSource{
+	Migrations: []*migrate.Migration{{% range $i, $m := .Migrations %}
 		{
 			Id: {% $m.Name | quote %},
 			Up: []string{
@@ -34,7 +37,12 @@ var PostgresMigrations migrate.MigrationSource = &migrate.MemoryMigrationSource{
 }
 `))
 
-// A single postgres migration.
+type databaseMigration struct {
+	DatabaseDialect string
+	Migrations []migration
+}
+
+// A single database migration.
 type migration struct {
 	Name string
 	Data string
@@ -46,27 +54,35 @@ func init() {
 }
 
 func main() {
-	files, err := filepath.Glob("*.sql")
-	if err != nil {
-		log.Fatalf("finding sql files: %v", err)
-	}
-
-	sort.Strings(files)
-	migrations := make([]migration, len(files))
-	for i, f := range files {
-		data, err := ioutil.ReadFile(f)
+	
+	for _, dialect := range dbDialects {
+		lowerDialect := strings.ToLower(dialect)
+		files, err := filepath.Glob(fmt.Sprintf("%s/*.sql", lowerDialect))
 		if err != nil {
-			log.Fatalf("reading file: %v", err)
+			log.Fatalf("finding sql files: %v", err)
 		}
-		migrations[i] = migration{f, string(data)}
-	}
+		sort.Strings(files)
 
-	f, err := os.OpenFile("assets.go", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		log.Fatalf("creating file: %v", err)
-	}
-	defer f.Close()
-	if err := tmpl.Execute(f, migrations); err != nil {
-		log.Fatal(err)
+		var dbMigration databaseMigration
+		dbMigration.DatabaseDialect = dialect
+		dbMigration.Migrations = make([]migration, len(files))
+		for i, f := range files {
+			data, err := ioutil.ReadFile(f)
+			if err != nil {
+				log.Fatalf("reading file: %v", err)
+			}
+			dbMigration.Migrations[i] = migration{f, string(data)}
+		}
+
+		assetsFile := fmt.Sprintf("%s_assets.go", lowerDialect) 
+		f, err := os.OpenFile(assetsFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+		if err != nil {
+			log.Fatalf("creating file: %v", err)
+		}
+		defer f.Close()
+		
+		if err := tmpl.Execute(f, dbMigration); err != nil {
+			log.Fatal(err)
+		}
 	}
 }

@@ -16,6 +16,10 @@ Before continuing, you must have the following installed on your system:
 * Go 1.4 or greater
 * Postgres 9.4 or greater (this guide also assumes that Postgres is up and running)
 
+... or ...
+
+* MySQL 5.6 or greater (again, this assumes that a database is up and running)
+
 In addition, if you wish to try out authenticating against Google's OIDC backend, you must have a new client registered with Google:
 
 * Go to https://console.developers.google.com/project and select an existing project or create a new project.
@@ -27,6 +31,7 @@ In addition, if you wish to try out authenticating against Google's OIDC backend
 
 On the PostgreSQL server, login as a user with appropriate permissions and create a database and user for dex to use. These can be named arbitrarily, but are called `dex_db` and `dex`, respectively, in this example.
 
+## Postgres
 ```sql
 CREATE DATABASE dex_db;
 CREATE USER dex WITH PASSWORD 'dex_pass';
@@ -37,6 +42,17 @@ Store the [connection string](http://www.postgresql.org/docs/9.4/static/libpq-co
 
 ```
 DEX_DB_URL=postgres://dex:dex_pass@localhost/dex_db?sslmode=disable
+```
+
+## MySQL
+```sql
+CREATE DATABASE dex_db;
+CREATE USER 'dex'@'localhost' IDENTIFIED BY 'dex_pass';
+GRANT ALL ON `dex_db`.* TO 'dex'@'localhost';
+```
+
+```
+DEX_DB_URL=mysql://dex:dex_pass@tcp(localhost:3306)/dex_db?parseTime=true&multiStatements=true
 ```
 
 # Building

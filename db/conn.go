@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/go-gorp/gorp"
+	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/coreos/dex/repo"
 )
@@ -58,6 +60,15 @@ func NewConnection(cfg Config) (*gorp.DbMap, error) {
 		db.SetMaxIdleConns(cfg.MaxIdleConnections)
 		db.SetMaxOpenConns(cfg.MaxOpenConnections)
 		dialect = gorp.PostgresDialect{}
+	case "mysql":
+		dsn := strings.Replace(cfg.DSN, "mysql://", "", -1)
+		db, err = sql.Open("mysql", dsn)
+		if err != nil {
+			return nil, err
+		}
+		db.SetMaxIdleConns(cfg.MaxIdleConnections)
+		db.SetMaxOpenConns(cfg.MaxOpenConnections)
+		dialect = gorp.MySQLDialect{"InnoDB", "UTF8"}
 	case "sqlite3":
 		db, err = sql.Open("sqlite3", u.Host)
 		if err != nil {

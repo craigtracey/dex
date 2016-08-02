@@ -248,7 +248,9 @@ func (cfg *MultiServerConfig) Configure(srv *Server) error {
 		return fmt.Errorf("unable to initialize database connection: %v", err)
 	}
 	if _, ok := dbc.Dialect.(gorp.PostgresDialect); !ok {
-		return errors.New("only postgres backend supported for multi server configurations")
+		if _, ok := dbc.Dialect.(gorp.MySQLDialect); !ok {
+			return errors.New("only postgres and mysql backends supported for multi server configurations")
+		}
 	}
 
 	kRepo, err := db.NewPrivateKeySetRepo(dbc, cfg.UseOldFormat, cfg.KeySecrets...)
